@@ -1,4 +1,11 @@
 # ImageCompress
+
+- 使用方式
+
+```java
+compile 'com.geeknum1:imagecompress:1.0.1' 或者 implementation project(':library')
+```
+- 样例
 ```java
  ImageCompress.with(this)
         //.load(BitmapFactory.decodeFile(filePath))//1、加载需要压缩的bitmap图片
