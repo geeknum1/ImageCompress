@@ -30,5 +30,11 @@ compile 'com.geeknum1:imagecompress:1.0.1' 或者 implementation project(':libra
                 e.printStackTrace();
                 Log.e("compress","onError");
             }
-        }).launch();
+        }).launch();  
+```
+
+
+- 图片 
+        
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20190329232348540.jpg)
                     
