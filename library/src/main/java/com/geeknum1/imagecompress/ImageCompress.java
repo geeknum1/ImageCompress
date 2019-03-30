@@ -3,6 +3,7 @@ package com.geeknum1.imagecompress;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -18,9 +19,6 @@ import com.geeknum1.imagecompress.utils.BitmapUtil;
  */
 public class ImageCompress implements Handler.Callback {
     private Builder mBuilder;
-    private final int DEFAULT_SIZE = 1024;
-    public static float max_width = 1280f;
-    public static float max_height = 960f;
     private Handler mHandler;
     private static final int MSG_COMPRESS_SUCCESS = 0;
     private static final int MSG_COMPRESS_START = 1;
@@ -37,7 +35,7 @@ public class ImageCompress implements Handler.Callback {
 
     private void launch() {
 
-        if ((TextUtils.isEmpty(mBuilder.filePath) && mBuilder.bitmap == null) && mBuilder.listener != null) {
+        if ((mBuilder.filePath == null) && mBuilder.listener != null) {
             mHandler.sendMessage(mHandler.obtainMessage(MSG_COMPRESS_ERROR, new NullPointerException("image file cannot be null")));
             return;
         }
@@ -50,17 +48,8 @@ public class ImageCompress implements Handler.Callback {
             @Override
             public void run() {
                 try {
-                    int ignoreSize = mBuilder.maxSize == 0 ? DEFAULT_SIZE : mBuilder.maxSize;
-                    String resultStr = "";
-                    String targetCompressPath = "";
-                    if (!TextUtils.isEmpty(mBuilder.filePath)) {
-                        targetCompressPath = getImageCacheFile(checkSuffix(mBuilder.filePath));
-                        resultStr = BitmapUtil.compressBitmap(mBuilder.filePath, targetCompressPath, ignoreSize);
-                    } else if (mBuilder.bitmap != null) {
-                        targetCompressPath = getImageCacheFile("");
-                        resultStr = BitmapUtil.compressBitmap(mBuilder.bitmap, targetCompressPath, ignoreSize);
-                    }
-
+                    String targetCompressPath = getImageCacheFile(checkSuffix(mBuilder.filePath));
+                    String resultStr = CompressCore.saveBitmap(setPictureDegree(mBuilder.filePath), targetCompressPath, true);
                     if ("1".equals(resultStr)) {
                         mHandler.sendMessage(mHandler.obtainMessage(MSG_COMPRESS_SUCCESS, targetCompressPath));
                     } else {
@@ -93,12 +82,6 @@ public class ImageCompress implements Handler.Callback {
         return false;
     }
 
-    private String checkSuffix(String path) {
-        if (TextUtils.isEmpty(path) || !path.contains(".")) {
-            return ".jpg";
-        }
-        return path.substring(path.lastIndexOf("."), path.length());
-    }
 
     private String getImageCacheFile(String suffix) {
         return mBuilder.targetDir + "/" +
@@ -107,14 +90,24 @@ public class ImageCompress implements Handler.Callback {
                 (TextUtils.isEmpty(suffix) ? ".jpg" : suffix);
     }
 
+    private String checkSuffix(String path) {
+        if (TextUtils.isEmpty(path) || !path.contains(".")) {
+            return ".jpg";
+        }
+        return path.substring(path.lastIndexOf("."), path.length());
+    }
+
     public static class Builder {
         private Context context;
-        private String filePath;
-        private int maxSize;
         private String targetDir;
         private OnCompressListener listener;
-        private Bitmap bitmap;
+        private String filePath;
 
+
+        public Builder setTargetDir(String targetDir) {
+            this.targetDir = targetDir;
+            return this;
+        }
 
 
         private Builder(Context context) {
@@ -125,35 +118,9 @@ public class ImageCompress implements Handler.Callback {
             return new ImageCompress(this);
         }
 
+
         public Builder load(String localPath) {
             this.filePath = localPath;
-            return this;
-        }
-
-        public Builder load(Bitmap image) {
-            this.bitmap = image;
-            return this;
-        }
-
-        public Builder maxSize(int size) {
-            this.maxSize = size;
-            return this;
-        }
-
-        public Builder maxWidth(int size) {
-            max_width = size;
-            return this;
-        }
-
-        public Builder maxHeight(int size) {
-            max_height = size;
-            return this;
-        }
-
-
-
-        public Builder setTargetDir(String targetDir) {
-            this.targetDir = targetDir;
             return this;
         }
 
@@ -174,4 +141,21 @@ public class ImageCompress implements Handler.Callback {
 
         void onError(Throwable e);
     }
+
+    private Bitmap setPictureDegree(String filePath) {
+        //旋转图片
+        int photoDegree = BitmapUtil.readPictureDegree(filePath);
+        Bitmap bitmap = BitmapFactory.decodeFile(filePath);
+        if (photoDegree != 0) {
+            Matrix matrix = new Matrix();
+            matrix.postRotate(photoDegree);
+
+            // 创建新的图片
+            bitmap = Bitmap.createBitmap(bitmap, 0, 0,
+                    bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+        }
+
+        return bitmap;
+    }
+
 }

@@ -2,6 +2,8 @@ package com.geeknum1.imagecompress;
 
 import android.graphics.Bitmap;
 
+import com.geeknum1.imagecompress.utils.BitmapUtil;
+
 /**
  * 图片压缩
  * Created by geeknum1 on 2019/03/27.
@@ -13,14 +15,13 @@ public class CompressCore {
     /**
      * 调用native方法
      * @param bit bitmap
-     * @param quality 压缩率
      * @param fileName 文件名
      * @param optimize 是否启用哈希曼算法
      * @return result 1表示成功 其它表示失败
      * @author geeknum1
      */
-    public static String saveBitmap(Bitmap bit, int quality, String fileName, boolean optimize) {
-        return compressBitmap(bit, bit.getWidth(), bit.getHeight(), quality, fileName.getBytes(), optimize);
+    public static String saveBitmap(Bitmap bit, String fileName, boolean optimize) {
+        return compressBitmap(bit, bit.getWidth(), bit.getHeight(), BitmapUtil.DEFAULT_QUALITY, fileName.getBytes(), optimize);
     }
 
     /**

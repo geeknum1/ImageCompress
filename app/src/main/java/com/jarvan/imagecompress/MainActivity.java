@@ -2,7 +2,10 @@ package com.jarvan.imagecompress;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.media.ExifInterface;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.NonNull;
@@ -14,29 +17,33 @@ import android.widget.ImageView;
 
 import com.geeknum1.imagecompress.ImageCompress;
 
+import java.io.BufferedInputStream;
 import java.io.File;
-
+import java.io.IOException;
 
 
 /**
- * @Description TODO
- * @Class MainActivity
  * @author geeknum1
  * @version V1.0.0
+ * @Description TODO
+ * @Class MainActivity
  */
-public class MainActivity extends Activity implements CameraCore.CameraResult{
-    private Button choose_image,camera_image;
+public class MainActivity extends Activity implements CameraCore.CameraResult {
+    private Button choose_image, camera_image;
     private CameraProxy cameraProxy;
     private ImageView choose_bit;
-    /** SD卡根目录 */
-    private final String externalStorageDirectory = Environment.getExternalStorageDirectory().getPath()+"/picture/";
+    /**
+     * SD卡根目录
+     */
+    private final String externalStorageDirectory = Environment.getExternalStorageDirectory().getPath() + "/picture/";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         //压缩后保存临时文件目录
         File tempFile = new File(externalStorageDirectory);
-        if(!tempFile.exists()){
+        if (!tempFile.exists()) {
             tempFile.mkdirs();
         }
         cameraProxy = new CameraProxy(this, MainActivity.this);
@@ -53,7 +60,7 @@ public class MainActivity extends Activity implements CameraCore.CameraResult{
         camera_image.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                String cameraPath = externalStorageDirectory+System.currentTimeMillis()/1000+".jpg";
+                String cameraPath = externalStorageDirectory + System.currentTimeMillis() / 1000 + ".jpg";
                 cameraProxy.getPhoto2Camera(cameraPath);
             }
         });
@@ -65,27 +72,24 @@ public class MainActivity extends Activity implements CameraCore.CameraResult{
         File file = new File(filePath);
         if (file.exists()) {
             ImageCompress.with(this)
-                    //.load(BitmapFactory.decodeFile(filePath))//1、加载需要压缩的bitmap图片
-                    .load(filePath)// 2、加载需要压缩的图片路径
+                    .load(filePath)//1、加载需要压缩的bitmap图片
                     .setTargetDir(externalStorageDirectory)//压缩后的存放路径
-                    .maxSize(2048)//图片压缩后允许的最大size，不设置默认值为1024kb
-                    .maxHeight(2000)//图片压缩后允许的最大高度、不设置默认值为1280，
-                    .maxWidth(1400)//图片压缩后允许的最大宽度、不设置默认值为960
-                    //当maxSize,maxHeight,maxWidth都大于原图宽、高、大小时，则为原图jni压缩，以上设置均无效（实际压缩后大小不可控），否则先质量压缩后jni压缩
                     .setOnCompressListener(new ImageCompress.OnCompressListener() {
                         @Override
                         public void onStart() {
-                            Log.e("compress","onStart");
+                            Log.e("compress", "onStart");
                         }
+
                         @Override
                         public void onSuccess(String filePath) {
-                            Log.e("compress","onSuccess="+filePath);
+                            Log.e("compress", "onSuccess=" + filePath);
                             choose_bit.setImageBitmap(BitmapFactory.decodeFile(filePath));
                         }
+
                         @Override
                         public void onError(Throwable e) {
                             e.printStackTrace();
-                            Log.e("compress","onError");
+                            Log.e("compress", "onError");
                         }
                     }).launch();
         }
@@ -110,16 +114,19 @@ public class MainActivity extends Activity implements CameraCore.CameraResult{
     }
 
     @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState){
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         cameraProxy.onRestoreInstanceState(savedInstanceState);
     }
 
     @Override
-    protected void onSaveInstanceState(Bundle outState){
+    protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         cameraProxy.onSaveInstanceState(outState);
     }
+
+
+
 
 }
 

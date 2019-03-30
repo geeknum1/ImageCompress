@@ -24,7 +24,7 @@ import com.geeknum1.imagecompress.ImageCompress;
 
 public class BitmapUtil {
     //默认压缩率
-    private final static int DEFAULT_QUALITY = 95;
+    public final static int DEFAULT_QUALITY = 20;
 
     /**
      * JNI基本压缩
@@ -34,7 +34,7 @@ public class BitmapUtil {
      * @author geeknum1
      */
     public static String compressBitmap(Bitmap bit, String fileName, boolean optimize) {
-        return CompressCore.saveBitmap(bit, DEFAULT_QUALITY, fileName, optimize);
+        return CompressCore.saveBitmap(bit, fileName, optimize);
     }
 
     /**
@@ -66,7 +66,7 @@ public class BitmapUtil {
             result.compress(Bitmap.CompressFormat.JPEG, options, baos);
         }
         // JNI保存图片到SD卡 这个关键
-        String resultStr = CompressCore.saveBitmap(result, options, filePath, true);
+        String resultStr = CompressCore.saveBitmap(result, filePath, true);
         // 释放Bitmap
         if (!result.isRecycled()) {
             result.recycle();
@@ -98,7 +98,7 @@ public class BitmapUtil {
             result.compress(Bitmap.CompressFormat.JPEG, quality, baos);
         }
         // JNI保存图片到SD卡 这个关键
-        String resultStr = CompressCore.saveBitmap(result, quality, targetFilePath, true);
+        String resultStr = CompressCore.saveBitmap(result, targetFilePath, true);
         // 释放Bitmap
         if (!result.isRecycled()) {
             result.recycle();
@@ -115,8 +115,8 @@ public class BitmapUtil {
      */
     private static float getRatioSize(int bitWidth, int bitHeight) {
         // 图片最大分辨率
-        float imageHeight = ImageCompress.max_height;
-        float imageWidth = ImageCompress.max_width;
+        float imageHeight = 1024;
+        float imageWidth = 960;
         // 缩放比
         float ratio = 1f;
         // 缩放比,由于是固定比例缩放，只用高或者宽其中一个数据进行计算即可
@@ -193,7 +193,7 @@ public class BitmapUtil {
      * @return degree旋转的角度
      */
 
-    private static int readPictureDegree(String path) {
+    public static int readPictureDegree(String path) {
         int degree = 0;
         try {
             ExifInterface exifInterface = new ExifInterface(path);
