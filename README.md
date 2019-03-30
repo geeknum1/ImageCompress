@@ -8,7 +8,7 @@ compile 'com.geeknum1:imagecompress:1.0.2' 或者 implementation project(':libra
 - 样例
 ```java
   ImageCompress.with(this)
-             .load(filePath)//1、加载需要压缩的bitmap图片
+             .load(filePath)//1、加载需要压缩的图片路径
              .setTargetDir(externalStorageDirectory)//压缩后的存放路径
              .setOnCompressListener(new ImageCompress.OnCompressListener() {
                  @Override
